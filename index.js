@@ -1,47 +1,30 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
- 
-Vue.use(VueRouter)
-Vue.use(require('vue-cookies'))
- 
-  const routes = [
-  {
-    path: '/login',
-    name: 'login',
-    component: () => import('../components/login.vue')
-  },
-  {
-    path: '/home',
-    name: 'home',
-    component: () => import('../components/home.vue')
-  },
-  {
-    path: '/chat',
-    name: 'chat',
-    component: () => import('../components/chat.vue')
+const express = require('express');
+const http = require('http');
+const app = express();
+const server = http.createServer(app);
+var cors = require('cors')
+
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "http://localhost:8080",
+    methods: ["GET", "POST"]
   }
-]
- 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
+});
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
+app.use(cors())
+
+io.on('connection', (socket) => {
+  socket.on('chatId',(data)=>{
+    console.log(data[0]);
+    socket.on(data[0],(msg)=>{
+      console.log(msg);
+      io.emit(data[0], data[1]+': '+msg);
+    })
+  });
 });
 
-router.beforeEach((to, from, next) => {
-  
-  const publicPages = ['/login'];
-  const authRequired = !publicPages.includes(to.path);
-  const loggedIn = document.cookie;
-
-
-  if (authRequired && !loggedIn) {
-     next('/login');
-  }
-  else next()
-  
-
- 
-})
- 
-export default router
+server.listen(5000, () => {
+  console.log('listening on *:5000');
+});
