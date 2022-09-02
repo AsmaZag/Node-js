@@ -106,7 +106,7 @@ export default {
                 
                 console.log('sending....')
                 this.socket.emit(sessionStorage.getItem('currentChatId'), this.msg);
-                this.messages.push({message: this.msg});
+                //this.messages.push({message: this.msg});
                 this.msg='';
                 this.unRead=true;
         },
@@ -125,6 +125,7 @@ export default {
         .then(response => (this.users = response.data))
 
         this.socket.on(chat_id, (msg)=>{
+            this.messages.push({message: msg});
             this.unRead=false;
             console.log(msg);
         })
